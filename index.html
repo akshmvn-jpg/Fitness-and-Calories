@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Calculator</title>
+    <!-- Use Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Use Inter font for a clean, modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+        }
+        .container {
+            max-width: 90%;
+            margin: auto;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="container bg-[#252839] rounded-2xl shadow-xl p-8 md:p-12 border border-[#3b3e51]">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-[#9a9bff]">Fitness & Calorie Calculator</h1>
+        <p class="text-center text-sm md:text-base text-gray-400 mb-8">
+            Get your personalized calorie recommendations for maintenance, weight loss, and muscle gain.
+        </p>
+
+        <!-- Form for user input -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Gender -->
+            <div class="flex flex-col">
+                <label for="gender" class="text-sm font-semibold mb-2 text-gray-300">Gender</label>
+                <select id="gender" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <!-- Age -->
+            <div class="flex flex-col">
+                <label for="age" class="text-sm font-semibold mb-2 text-gray-300">Age (years)</label>
+                <input type="number" id="age" placeholder="e.g., 30" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+            </div>
+
+            <!-- Weight -->
+            <div class="flex flex-col">
+                <label for="weight" class="text-sm font-semibold mb-2 text-gray-300">Weight (pounds)</label>
+                <input type="number" id="weight" placeholder="e.g., 175" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+            </div>
+
+            <!-- Height -->
+            <div class="flex flex-col">
+                <label for="height" class="text-sm font-semibold mb-2 text-gray-300">Height (inches)</label>
+                <input type="number" id="height" placeholder="e.g., 70" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+            </div>
+            
+            <!-- Activity Level -->
+            <div class="flex flex-col md:col-span-2">
+                <label for="activity" class="text-sm font-semibold mb-2 text-gray-300">Activity Level</label>
+                <select id="activity" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+                    <option value="1.2">Sedentary (little or no exercise)</option>
+                    <option value="1.375">Lightly Active (1-3 days/week)</option>
+                    <option value="1.55">Moderately Active (3-5 days/week)</option>
+                    <option value="1.725">Very Active (6-7 days/week)</option>
+                    <option value="1.9">Extra Active (very intense daily exercise/physical job)</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Calculation button -->
+        <button id="calculateBtn" class="w-full mt-8 py-3 bg-[#9a9bff] text-[#1a1a2e] font-bold rounded-lg hover:bg-[#8282f1] transition-colors shadow-lg transform hover:scale-105">
+            Calculate
+        </button>
+
+        <!-- Results section (initially hidden) -->
+        <div id="results" class="mt-8 p-6 bg-[#3b3e51] rounded-2xl border border-[#4d5168] shadow-lg hidden">
+            <h2 class="text-2xl font-bold mb-4 text-[#9a9bff] text-center">Your Personalized Results</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center bg-[#4d5168] p-4 rounded-xl">
+                    <span class="text-lg font-semibold text-gray-300">Basal Metabolic Rate (BMR):</span>
+                    <span id="bmrResult" class="text-xl font-bold text-white"></span>
+                </div>
+                <div class="flex justify-between items-center bg-[#4d5168] p-4 rounded-xl">
+                    <span class="text-lg font-semibold text-gray-300">Total Daily Energy Expenditure (TDEE):</span>
+                    <span id="tdeeResult" class="text-xl font-bold text-white"></span>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-2 text-gray-200 text-center">Recommended Daily Calorie Intake</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div class="text-center bg-[#4d5168] p-4 rounded-xl shadow-md">
+                        <p class="text-lg font-semibold text-gray-300">Maintenance</p>
+                        <p id="maintenanceResult" class="text-2xl font-bold text-white mt-1"></p>
+                    </div>
+                    <div class="text-center bg-[#4d5168] p-4 rounded-xl shadow-md">
+                        <p class="text-lg font-semibold text-gray-300">Weight Loss</p>
+                        <p id="weightLossResult" class="text-2xl font-bold text-white mt-1"></p>
+                    </div>
+                    <div class="text-center bg-[#4d5168] p-4 rounded-xl shadow-md">
+                        <p class="text-lg font-semibold text-gray-300">Muscle Gain</p>
+                        <p id="muscleGainResult" class="text-2xl font-bold text-white mt-1"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error message box -->
+        <div id="errorBox" class="mt-4 p-4 text-center text-red-300 bg-red-800 rounded-lg hidden">
+            Please fill in all the fields with valid numbers.
+        </div>
+    </div>
+
+    <script>
+        // Get references to all input fields and display elements
+        const genderEl = document.getElementById('gender');
+        const ageEl = document.getElementById('age');
+        const weightEl = document.getElementById('weight');
+        const heightEl = document.getElementById('height');
+        const activityEl = document.getElementById('activity');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsEl = document.getElementById('results');
+        const bmrResultEl = document.getElementById('bmrResult');
+        const tdeeResultEl = document.getElementById('tdeeResult');
+        const maintenanceResultEl = document.getElementById('maintenanceResult');
+        const weightLossResultEl = document.getElementById('weightLossResult');
+        const muscleGainResultEl = document.getElementById('muscleGainResult');
+        const errorBoxEl = document.getElementById('errorBox');
+
+        // Add a click event listener to the calculate button
+        calculateBtn.addEventListener('click', () => {
+            // Get values from input fields
+            const gender = genderEl.value;
+            const age = parseInt(ageEl.value);
+            const weightLbs = parseFloat(weightEl.value);
+            const heightIn = parseFloat(heightEl.value);
+            const activityMultiplier = parseFloat(activityEl.value);
+
+            // Simple validation to ensure all fields are filled
+            if (isNaN(age) || isNaN(weightLbs) || isNaN(heightIn)) {
+                errorBoxEl.classList.remove('hidden');
+                resultsEl.classList.add('hidden');
+                return;
+            } else {
+                errorBoxEl.classList.add('hidden');
+            }
+
+            // --- Calculation Logic (ported from Java) ---
+
+            // Convert to metric units for the calculation
+            const weightKg = weightLbs * 0.453592;
+            const heightCm = heightIn * 2.54;
+
+            // Calculate Basal Metabolic Rate (BMR) using Mifflin-St Jeor equation
+            let bmr;
+            if (gender === 'male') {
+                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+            } else { // gender === 'female'
+                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+            }
+
+            // Calculate Total Daily Energy Expenditure (TDEE)
+            const tdee = bmr * activityMultiplier;
+
+            // Calculate calorie targets for different goals
+            const maintenanceCalories = tdee;
+            const weightLossCalories = tdee - 500;
+            const muscleGainCalories = tdee + 250;
+
+            // --- Display Results ---
+
+            // Set the text content of the result elements
+            bmrResultEl.textContent = `${bmr.toFixed(2)} calories`;
+            tdeeResultEl.textContent = `${tdee.toFixed(2)} calories`;
+            maintenanceResultEl.textContent = `${Math.round(maintenanceCalories)}`;
+            weightLossResultEl.textContent = `${Math.round(weightLossCalories)}`;
+            muscleGainResultEl.textContent = `${Math.round(muscleGainCalories)}`;
+
+            // Make the results section visible
+            resultsEl.classList.remove('hidden');
+        });
+    </script>
+
+</body>
+</html>
