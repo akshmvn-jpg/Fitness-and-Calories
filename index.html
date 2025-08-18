@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitness Calculator</title>
+    <!-- AdSense Code -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8149816137590711" crossorigin="anonymous"></script>
+    
     <!-- Use Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -18,6 +21,19 @@
             max-width: 90%;
             margin: auto;
             padding: 2rem;
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fadeInDown {
+            animation: fadeInDown 0.5s ease-out forwards;
         }
     </style>
 </head>
@@ -49,14 +65,17 @@
 
             <!-- Weight -->
             <div class="flex flex-col">
-                <label for="weight" class="text-sm font-semibold mb-2 text-gray-300">Weight (pounds)</label>
-                <input type="number" id="weight" placeholder="e.g., 175" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+                <label for="weightKg" class="text-sm font-semibold mb-2 text-gray-300">Weight (kilograms)</label>
+                <input type="number" id="weightKg" placeholder="e.g., 80" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
             </div>
 
-            <!-- Height -->
+            <!-- Height (Feet & Inches) -->
             <div class="flex flex-col">
-                <label for="height" class="text-sm font-semibold mb-2 text-gray-300">Height (inches)</label>
-                <input type="number" id="height" placeholder="e.g., 70" class="p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+                <label class="text-sm font-semibold mb-2 text-gray-300">Height</label>
+                <div class="flex space-x-2">
+                    <input type="number" id="heightFt" placeholder="ft" class="w-1/2 p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+                    <input type="number" id="heightIn" placeholder="in" class="w-1/2 p-3 bg-[#3b3e51] text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#9a9bff] transition-all">
+                </div>
             </div>
             
             <!-- Activity Level -->
@@ -76,6 +95,16 @@
         <button id="calculateBtn" class="w-full mt-8 py-3 bg-[#9a9bff] text-[#1a1a2e] font-bold rounded-lg hover:bg-[#8282f1] transition-colors shadow-lg transform hover:scale-105">
             Calculate
         </button>
+
+        <!-- Error message box -->
+        <div id="errorBox" class="mt-4 p-4 text-center text-red-300 bg-red-800 rounded-lg hidden">
+            Please fill in all the fields with valid numbers.
+        </div>
+
+        <!-- Scroll-down message -->
+        <div id="scrollMsg" class="text-center text-lg mt-6 text-[#9a9bff] hidden">
+            Scroll down to see your results! 👇
+        </div>
 
         <!-- Results section (initially hidden) -->
         <div id="results" class="mt-8 p-6 bg-[#3b3e51] rounded-2xl border border-[#4d5168] shadow-lg hidden">
@@ -109,19 +138,15 @@
                 </div>
             </div>
         </div>
-
-        <!-- Error message box -->
-        <div id="errorBox" class="mt-4 p-4 text-center text-red-300 bg-red-800 rounded-lg hidden">
-            Please fill in all the fields with valid numbers.
-        </div>
     </div>
 
     <script>
         // Get references to all input fields and display elements
         const genderEl = document.getElementById('gender');
         const ageEl = document.getElementById('age');
-        const weightEl = document.getElementById('weight');
-        const heightEl = document.getElementById('height');
+        const weightKgEl = document.getElementById('weightKg');
+        const heightFtEl = document.getElementById('heightFt');
+        const heightInEl = document.getElementById('heightIn');
         const activityEl = document.getElementById('activity');
         const calculateBtn = document.getElementById('calculateBtn');
         const resultsEl = document.getElementById('results');
@@ -131,30 +156,33 @@
         const weightLossResultEl = document.getElementById('weightLossResult');
         const muscleGainResultEl = document.getElementById('muscleGainResult');
         const errorBoxEl = document.getElementById('errorBox');
+        const scrollMsgEl = document.getElementById('scrollMsg'); 
 
         // Add a click event listener to the calculate button
         calculateBtn.addEventListener('click', () => {
             // Get values from input fields
             const gender = genderEl.value;
             const age = parseInt(ageEl.value);
-            const weightLbs = parseFloat(weightEl.value);
-            const heightIn = parseFloat(heightEl.value);
+            const weightKg = parseFloat(weightKgEl.value);
+            const heightFt = parseFloat(heightFtEl.value);
+            const heightIn = parseFloat(heightInEl.value);
             const activityMultiplier = parseFloat(activityEl.value);
 
             // Simple validation to ensure all fields are filled
-            if (isNaN(age) || isNaN(weightLbs) || isNaN(heightIn)) {
+            if (isNaN(age) || isNaN(weightKg) || isNaN(heightFt) || isNaN(heightIn)) {
                 errorBoxEl.classList.remove('hidden');
                 resultsEl.classList.add('hidden');
+                scrollMsgEl.classList.add('hidden'); 
+                calculateBtn.classList.remove('hidden');
                 return;
             } else {
                 errorBoxEl.classList.add('hidden');
             }
 
-            // --- Calculation Logic (ported from Java) ---
-
-            // Convert to metric units for the calculation
-            const weightKg = weightLbs * 0.453592;
-            const heightCm = heightIn * 2.54;
+            // --- Calculation Logic ---
+            // Convert feet and inches to total height in centimeters
+            const totalHeightInches = (heightFt * 12) + heightIn;
+            const heightCm = totalHeightInches * 2.54;
 
             // Calculate Basal Metabolic Rate (BMR) using Mifflin-St Jeor equation
             let bmr;
@@ -181,8 +209,10 @@
             weightLossResultEl.textContent = `${Math.round(weightLossCalories)}`;
             muscleGainResultEl.textContent = `${Math.round(muscleGainCalories)}`;
 
-            // Make the results section visible
+            // Make the results section and scroll message visible
             resultsEl.classList.remove('hidden');
+            scrollMsgEl.classList.remove('hidden');
+            calculateBtn.classList.add('hidden'); 
         });
     </script>
 
